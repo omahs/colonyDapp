@@ -72,9 +72,7 @@ const ColonySubscription = ({
   );
 
   const isNetworkAllowed = checkIfNetworkIsAllowed(networkId);
-
   const isMobile = useMediaQuery({ query });
-
   return (
     <div className={styles.main}>
       {loadingSubscribe ||
