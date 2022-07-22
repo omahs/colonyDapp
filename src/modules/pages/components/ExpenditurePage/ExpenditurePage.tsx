@@ -291,13 +291,13 @@ const ExpenditurePage = ({ match }: Props) => {
         split: {
           ...initialValues.split,
           amount: {
-            tokenAddress: colonyData?.processedColony.nativeTokenAddress,
+            tokenAddress: colonyData?.processedColony?.nativeTokenAddress,
           },
         },
         staged: {
           ...initialValues.staged,
           amount: {
-            tokenAddress: colonyData?.processedColony.nativeTokenAddress,
+            tokenAddress: colonyData?.processedColony?.nativeTokenAddress,
           },
         },
       }
