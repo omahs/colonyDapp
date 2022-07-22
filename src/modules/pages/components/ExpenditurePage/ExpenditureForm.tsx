@@ -13,6 +13,7 @@ import { Colony } from '~data/index';
 
 import { ValuesType, ExpenditureTypes } from './types';
 import styles from './ExpenditurePage.css';
+import { ExpenditureTypes } from './types';
 
 const MSG = defineMessages({
   submit: {
