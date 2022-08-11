@@ -8,7 +8,11 @@ import { removeValueUnits } from '~utils/css';
 import {
   TransactionOrMessageGroups,
   transactionCount,
+  findNewestGroup,
+  getGroupStatus,
 } from './transactionGroup';
+
+import { TRANSACTION_STATUSES } from '~immutable/index';
 
 import GasStationContent from './GasStationContent';
 
@@ -30,18 +34,36 @@ const GasStationPopover = ({
   const [isOpen, setOpen] = useState(false);
   const [useCloseDelay, setUseCloseDelay] = useState(false);
   const [txNeedsSigning, setTxNeedsSigning] = useState(false);
+  const [groupStatus, setGroupStatus] = useState(TRANSACTION_STATUSES.READY);
+
   const txCount = useMemo(() => transactionCount(transactionAndMessageGroups), [
     transactionAndMessageGroups,
   ]);
+
+  useEffect(() => {
+    if (transactionAndMessageGroups.length > 0) {
+      setGroupStatus(
+        getGroupStatus(findNewestGroup(transactionAndMessageGroups)),
+      );
+    }
+  }, [transactionAndMessageGroups]);
+
   const prevTxCount: number | void = usePrevious(txCount);
 
   useEffect(() => {
     if (prevTxCount != null && txCount > prevTxCount) {
       setOpen(true);
       setTxNeedsSigning(true);
-      setUseCloseDelay(true);
     }
-  }, [txCount, prevTxCount, setTxNeedsSigning, useCloseDelay]);
+  }, [txCount, prevTxCount, setTxNeedsSigning]);
+
+  useEffect(() => {
+    if (groupStatus === TRANSACTION_STATUSES.SUCCEEDED) {
+      setUseCloseDelay(true);
+    } else {
+      setUseCloseDelay(false);
+    }
+  }, [groupStatus]);
 
   /*
    * @NOTE Offset Calculations
