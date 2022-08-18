@@ -23,6 +23,8 @@ import { GNOSIS_SAFE_INTEGRATION_LEARN_MORE } from '~externalUrls';
 import { Colony, useLoggedInUser } from '~data/index';
 import { Address, PrimitiveType } from '~types/index';
 
+import { AbiItemExtended } from '../../../hooks/useContractABIParser';
+
 import SafeTransactionPreview from './SafeTransactionPreview';
 import { FormValues } from './GnosisControlSafeDialog';
 import {
@@ -133,6 +135,10 @@ interface Props {
   back?: () => void;
   showPreview: boolean;
   handleShowPreview: (showPreview: boolean) => void;
+  selectedContractMethod: AbiItemExtended | undefined;
+  handleSelectedContractMethod: React.Dispatch<
+    React.SetStateAction<AbiItemExtended>
+  >;
 }
 
 const renderAvatar = (address: string, item) => (
@@ -159,6 +165,8 @@ const GnosisControlSafeForm = ({
   showPreview,
   handleShowPreview,
   validateForm,
+  selectedContractMethod,
+  handleSelectedContractMethod,
 }: Props & FormikProps<FormValues>) => {
   const [transactionTabStatus, setTransactionTabStatus] = useState([true]);
   const [hasTitle, setHasTitle] = useState(true);
@@ -198,7 +206,7 @@ const GnosisControlSafeForm = ({
         amount: undefined,
         recipient: null,
         data: '',
-        contract: '',
+        contract: null,
         abi: '',
         contractFunction: '',
         nft: null,
@@ -388,6 +396,12 @@ const GnosisControlSafeForm = ({
                         <ContractInteractionSection
                           disabledInput={!userHasPermission || isSubmitting}
                           transactionFormIndex={index}
+                          values={values}
+                          setFieldValue={setFieldValue}
+                          selectedContractMethod={selectedContractMethod}
+                          handleSelectedContractMethod={
+                            handleSelectedContractMethod
+                          }
                         />
                       )}
                       {values.transactions[index]?.transactionType ===
