@@ -56,8 +56,12 @@ export const MSG = defineMessages({
     defaultMessage: 'Not all rows were imported, please review. {button}',
   },
   viewAll: {
-    id: `dashboard.ExpenditurePage.Batch.CSVUploader.CSVUploaderItem.viewAll`,
+    id: `dashboard.ExpenditurePage.Batch.viewAll`,
     defaultMessage: 'View all',
+  },
+  fileError: {
+    id: 'dashboard.ExpenditurePage.fileError',
+    defaultMessage: `File structure is incorrect, try again using the template.`,
   },
 });
 
@@ -70,7 +74,7 @@ interface Props {
 const Batch = ({ colony }: Props) => {
   const [processingCSVData, setProcessingCSVData] = useState<boolean>(false);
   const { formatMessage } = useIntl();
-  const [, { value: batch }] = useField('batch');
+  const [, { value: batch, error }] = useField<BatchType>('batch');
   const batchData = batch?.dataCSVUploader?.[0]?.parsedData;
 
   const data = useCalculateBatchPayment(colony, batchData);
@@ -96,7 +100,7 @@ const Batch = ({ colony }: Props) => {
               setProcessingData={setProcessingCSVData}
             />
           </div>
-          {!isNil(batchData) && (
+          {batchData && (
             <Button
               type="button"
               onClick={() => openPreviewDialog({ values: validatedData })}
