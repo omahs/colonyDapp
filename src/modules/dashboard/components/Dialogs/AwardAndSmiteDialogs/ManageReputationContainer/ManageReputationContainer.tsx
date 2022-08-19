@@ -14,6 +14,7 @@ import { ActionTypes } from '~redux/index';
 import { useMembersSubscription } from '~data/index';
 import { pipe, withMeta, mapPayload } from '~utils/actions';
 import { useSelectedUser } from '~utils/hooks/useSelectedUser';
+import { useEnabledExtensions } from '~utils/hooks/useEnabledExtensions';
 
 import DialogForm from '../ManageReputationDialogForm';
 import {
@@ -33,7 +34,6 @@ const MSG = defineMessages({
 const ManageReputationContainer = ({
   colony: { colonyAddress, colonyName, tokens, nativeTokenAddress },
   colony,
-  isVotingExtensionEnabled,
   callStep,
   prevStep,
   cancel,
@@ -59,6 +59,10 @@ const ManageReputationContainer = ({
     setTotalReputationData(totalRep);
     setUserReputation(userRepPercentage);
   };
+
+  const { isVotingExtensionEnabled } = useEnabledExtensions({
+    colonyAddress,
+  });
 
   const getFormAction = useCallback(
     (actionType: 'SUBMIT' | 'ERROR' | 'SUCCESS') => {
@@ -160,7 +164,6 @@ const ManageReputationContainer = ({
               {...formValues}
               colony={colony}
               nativeTokenDecimals={nativeTokenDecimals}
-              isVotingExtensionEnabled={isVotingExtensionEnabled}
               back={() => callStep(prevStep)}
               ethDomainId={ethDomainId}
               updateReputation={

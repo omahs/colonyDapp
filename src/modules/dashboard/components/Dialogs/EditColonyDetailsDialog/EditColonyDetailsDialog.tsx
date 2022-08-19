@@ -8,6 +8,7 @@ import { ActionForm } from '~core/Fields';
 
 import { ActionTypes } from '~redux/index';
 import { WizardDialogType } from '~utils/hooks';
+import { useEnabledExtensions } from '~utils/hooks/useEnabledExtensions';
 import { pipe, withMeta, mapPayload } from '~utils/actions';
 
 import DialogForm from './EditColonyDetailsDialogForm';
@@ -42,10 +43,13 @@ const EditColonyDetailsDialog = ({
     isWhitelistActivated,
   },
   colony,
-  isVotingExtensionEnabled,
 }: Props) => {
   const [isForce, setIsForce] = useState(false);
   const history = useHistory();
+
+  const { isVotingExtensionEnabled } = useEnabledExtensions({
+    colonyAddress,
+  });
 
   const getFormAction = useCallback(
     (actionType: 'SUBMIT' | 'ERROR' | 'SUCCESS') => {
@@ -126,7 +130,6 @@ const EditColonyDetailsDialog = ({
               {...formValues}
               colony={colony}
               back={() => callStep(prevStep)}
-              isVotingExtensionEnabled={isVotingExtensionEnabled}
             />
           </Dialog>
         );

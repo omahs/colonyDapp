@@ -46,6 +46,9 @@ export const useEnabledExtensions = ({ colonyAddress }: Props) => {
 
   return {
     isVotingExtensionEnabled,
+    votingExtensionVersion: installedVotingExtension
+      ? installedVotingExtension?.details?.version
+      : null,
     isOneTxPaymentExtensionEnabled,
     installedExtensionsAddresses,
     isWhitelistExtensionEnabled,
