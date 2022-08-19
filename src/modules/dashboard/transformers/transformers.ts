@@ -15,6 +15,7 @@ import {
   FormattedAction,
   FormattedEvent,
   ColonyAndExtensionsEvents,
+  ColonyMotions,
 } from '~types/index';
 import { ACTIONS_EVENTS } from '~dashboard/ActionsPage/staticMaps';
 import { getValuesForActionType } from '~utils/colonyActions';
@@ -125,11 +126,14 @@ export const getActionsListData = (
      */
     motions:
       unformattedActions?.motions?.reduce((acc, motion) => {
-        const { requiredStake, stakes, escalated } = motion;
+        const { requiredStake, stakes, escalated, type } = motion;
         const totalNayStake = bigNumberify(stakes[0] || 0);
         const totalYayStake = bigNumberify(stakes[1] || 0);
         const currentStake = totalNayStake.add(totalYayStake).toString();
         const enoughStake = shouldDisplayMotion(currentStake, requiredStake);
+        if (type === ColonyMotions.NullMotion || !type) {
+          return acc;
+        }
         if (escalated || enoughStake) {
           return [...acc, motion];
         }
