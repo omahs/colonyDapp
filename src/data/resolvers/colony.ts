@@ -6,7 +6,6 @@ import {
   ColonyVersion,
   Extension,
   TokenClientType,
-  extensions,
   getExtensionHash,
   ROOT_DOMAIN_ID,
   getHistoricColonyRoles,
@@ -51,6 +50,7 @@ import {
   BannedUsersQueryVariables,
   BannedUsersDocument,
 } from '~data/index';
+import extensions from '../staticData/extensionData';
 
 import { createAddress } from '~utils/web3';
 import { log } from '~utils/debug';
@@ -921,7 +921,7 @@ export const colonyResolvers = ({
       return isDeploymentFinished;
     },
     async installedExtensions({ colonyAddress }) {
-      const promises = extensions.map((extensionId: Extension) =>
+      const promises = Object.keys(extensions).map((extensionId: Extension) =>
         networkClient.getExtensionInstallation(
           getExtensionHash(extensionId),
           colonyAddress,
@@ -941,7 +941,7 @@ export const colonyResolvers = ({
                 __typename: 'ColonyExtension',
                 colonyAddress,
                 id: address,
-                extensionId: extensions[index],
+                extensionId: Object.keys(extensions)[index],
                 address,
               },
             ];

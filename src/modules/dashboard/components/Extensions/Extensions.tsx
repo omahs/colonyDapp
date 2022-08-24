@@ -54,13 +54,11 @@ const Extensions = ({ colonyAddress }: Props) => {
   const installedExtensionsData = useMemo(() => {
     if (data?.processedColony?.installedExtensions) {
       const { installedExtensions } = data.processedColony;
-      return installedExtensions.map(
-        ({ extensionId, address, details: { version } }) => ({
-          ...extensionData[extensionId],
-          address,
-          currentVersion: version,
-        }),
-      );
+      return installedExtensions.map(({ extensionId, address, details }) => ({
+        ...extensionData[extensionId],
+        address,
+        currentVersion: details?.version || 0,
+      }));
     }
     return [];
   }, [data]);
