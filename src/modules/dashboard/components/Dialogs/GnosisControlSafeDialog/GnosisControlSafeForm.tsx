@@ -397,7 +397,9 @@ const GnosisControlSafeForm = ({
                           disabledInput={!userHasPermission || isSubmitting}
                           transactionFormIndex={index}
                           values={values}
+                          safes={safes}
                           setFieldValue={setFieldValue}
+                          validateForm={validateForm}
                           selectedContractMethod={selectedContractMethod}
                           handleSelectedContractMethod={
                             handleSelectedContractMethod
