@@ -14,6 +14,7 @@ import { Address } from '~types/index';
 import { NFT } from '~dashboard/Dialogs/GnosisControlSafeDialog';
 
 import styles from './GnosisNFTTransfer.css';
+import { getFilteredNFTData } from '../utils';
 
 const MSG = defineMessages({
   selectNFT: {
@@ -79,11 +80,11 @@ const GnosisNFTTransfer = ({
 
   const filteredNFTData = useMemo(
     () =>
-      nftCatalogue.find(
-        (item) =>
-          item?.address === values?.transactions[transactionFormIndex]?.nft?.id,
+      getFilteredNFTData(
+        nftCatalogue,
+        values?.transactions[transactionFormIndex]?.nft?.id,
       ),
-    [nftCatalogue, transactionFormIndex, values],
+    [nftCatalogue, values, transactionFormIndex],
   );
 
   return (
