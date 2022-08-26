@@ -11,10 +11,10 @@ import { ActionForm } from '~core/Fields';
 import { ActionTypes } from '~redux/index';
 import { WizardDialogType } from '~utils/hooks';
 import { Address } from '~types/index';
+import { AbiItemExtended } from '~utils/getContractUsefulMethods';
 
 import { TransactionTypes } from './constants';
 import GnosisControlSafeForm, { NFT } from './GnosisControlSafeForm';
-import { AbiItemExtended } from '~modules/dashboard/hooks/useContractABIParser';
 
 const MSG = defineMessages({
   requiredFieldError: {
@@ -76,9 +76,9 @@ const GnosisControlSafeDialog = ({
   isVotingExtensionEnabled,
 }: Props) => {
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedContractMethod, setSelectedContractMethod] = useState<
-    AbiItemExtended
-  >();
+  const [selectedContractMethods, setSelectedContractMethods] = useState<{
+    [key: number]: AbiItemExtended | undefined;
+  }>();
   const [expandedValidationSchema, setExpandedValidationSchema] = useState<
     Record<string, any>
   >({});
@@ -143,19 +143,20 @@ const GnosisControlSafeDialog = ({
   );
 
   useEffect(() => {
-    if (selectedContractMethod) {
+    if (selectedContractMethods) {
       const updatedExpandedValidationSchema = {};
 
-      selectedContractMethod?.inputs?.map((input) => {
-        updatedExpandedValidationSchema[input.name] = getMethodInputValidation(
-          input.type,
-          selectedContractMethod.name,
-        );
+      Object.values(selectedContractMethods).forEach((method) => {
+        method?.inputs?.forEach((input) => {
+          updatedExpandedValidationSchema[
+            input.name
+          ] = getMethodInputValidation(input.type, method.name);
+        });
       });
 
       setExpandedValidationSchema(updatedExpandedValidationSchema);
     }
-  }, [selectedContractMethod, getMethodInputValidation]);
+  }, [selectedContractMethods, getMethodInputValidation]);
 
   const validationSchema = yup.object().shape({
     safe: yup.string().required(() => MSG.requiredFieldError),
@@ -165,7 +166,8 @@ const GnosisControlSafeDialog = ({
         transactionType: yup.string().required(() => MSG.requiredFieldError),
         recipient: yup.object().when('transactionType', {
           is: (transactionType) =>
-            transactionType === TransactionTypes.TRANSFER_FUNDS,
+            transactionType === TransactionTypes.TRANSFER_FUNDS ||
+            transactionType === TransactionTypes.TRANSFER_NFT,
           then: yup.object().shape({
             profile: yup.object().shape({
               walletAddress: yup
@@ -174,7 +176,7 @@ const GnosisControlSafeDialog = ({
                 .required(() => MSG.requiredFieldError),
             }),
           }),
-          otherwise: false,
+          otherwise: yup.object().nullable(),
         }),
         amount: yup.number().when('transactionType', {
           is: (transactionType) =>
@@ -213,7 +215,7 @@ const GnosisControlSafeDialog = ({
                 .required(() => MSG.requiredFieldError),
             }),
           }),
-          otherwise: false,
+          otherwise: yup.object().nullable(),
         }),
         abi: yup.string().when('transactionType', {
           is: (transactionType) =>
@@ -227,28 +229,20 @@ const GnosisControlSafeDialog = ({
           then: yup.string().required(() => MSG.requiredFieldError),
           otherwise: false,
         }),
-        nft: yup
-          .object()
-          .shape({
+        nft: yup.object().when('transactionType', {
+          is: (transactionType) =>
+            transactionType === TransactionTypes.TRANSFER_NFT,
+          then: yup.object().shape({
             profile: yup.object().shape({
-              displayName: yup.string().when('transactionType', {
-                is: (transactionType) =>
-                  transactionType === TransactionTypes.TRANSFER_NFT,
-                then: yup.string().required(() => MSG.requiredFieldError),
-                otherwise: false,
-              }),
-              walletAddress: yup.string().when('transactionType', {
-                is: (transactionType) =>
-                  transactionType === TransactionTypes.TRANSFER_NFT,
-                then: yup
-                  .string()
-                  .address()
-                  .required(() => MSG.requiredFieldError),
-                otherwise: false,
-              }),
+              displayName: yup.string().required(() => MSG.requiredFieldError),
+              walletAddress: yup
+                .string()
+                .address()
+                .required(() => MSG.requiredFieldError),
             }),
-          })
-          .nullable(),
+          }),
+          otherwise: yup.object().nullable(),
+        }),
         ...expandedValidationSchema,
       }),
     ),
@@ -289,8 +283,8 @@ const GnosisControlSafeDialog = ({
             isVotingExtensionEnabled={isVotingExtensionEnabled}
             showPreview={showPreview}
             handleShowPreview={setShowPreview}
-            selectedContractMethod={selectedContractMethod}
-            handleSelectedContractMethod={setSelectedContractMethod}
+            selectedContractMethods={selectedContractMethods}
+            handleSelectedContractMethods={setSelectedContractMethods}
           />
         </Dialog>
       )}
