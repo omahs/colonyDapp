@@ -29,19 +29,27 @@ const MSG = defineMessages({
     id: 'dashboard.GnosisControlSafeDialog.notAddressArray',
     defaultMessage: 'Addresses must be formatted correctly',
   },
+  notAddress: {
+    id: 'dashboard.GnosisControlSafeDialog.notAddress',
+    defaultMessage: 'Address must be formatted correctly',
+  },
+  notBooleanError: {
+    id: 'dashboard.GnosisControlSafeDialog.notBooleanError',
+    defaultMessage: 'Value must be a boolean',
+  },
 });
 
 /* to remove when data is wired in */
 const safes = [
   {
-    name: 'All Saints',
-    address: '0x3a157280ca91bB49dAe3D1619C55Da7F9D4438c2',
-    chain: 'Gnosis Chain',
+    safeName: 'All Saints',
+    contractAddress: '0x3a157280ca91bB49dAe3D1619C55Da7F9D4438c2',
+    chainId: '100',
   },
   {
-    name: '',
-    address: '0x3a157280ca91bB49dAe3D1619C55Da7F9D4438c3',
-    chain: 'Mainnet',
+    safeName: "Pipe's dream",
+    contractAddress: '0x3a157280ca91bB49dAe3D1619C55Da7F9D4438c3',
+    chainId: '1',
   },
 ];
 
@@ -57,7 +65,7 @@ export interface FormValues {
     contractFunction?: string;
     nft: NFT;
   }[];
-  safe: string;
+  safe: AnyUser;
   forceAction: boolean;
   transactionsTitle: string;
 }
@@ -119,7 +127,9 @@ const GnosisControlSafeDialog = ({
           },
           then: yup
             .string()
-            .address(() => (isArraySchema ? MSG.notAddressArray : null))
+            .address(() =>
+              isArraySchema ? MSG.notAddressArray : MSG.notAddress,
+            )
             .required(() => MSG.requiredFieldError),
           otherwise: false,
         });
@@ -128,7 +138,10 @@ const GnosisControlSafeDialog = ({
         return yup.bool().when('contractFunction', {
           is: (contractFunction) =>
             contractFunction === contractName || isArraySchema,
-          then: yup.bool().required(() => MSG.requiredFieldError),
+          then: yup
+            .bool()
+            .typeError(() => MSG.notBooleanError)
+            .required(() => MSG.requiredFieldError),
           otherwise: false,
         });
       }
