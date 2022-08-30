@@ -225,19 +225,18 @@ const validationSchema = yup.object().shape({
           yup.object().shape({
             parsedData: yup
               .array()
-              .min(1, () => MSG.fileError)
-              .max(400, () => MSG.amountError)
               .test(
                 'valid-payment',
                 () => MSG.fileError,
                 (value) =>
                   isEmpty(
                     value?.filter(
-                      (potentialAddress: string) =>
-                        !isBatchPaymentType(potentialAddress),
+                      (payment: string) => !isBatchPaymentType(payment),
                     ),
                   ),
-              ),
+              )
+              .min(1, () => MSG.fileError)
+              .max(400, () => MSG.amountError),
           }),
         ),
       })
@@ -254,7 +253,7 @@ export interface State {
 }
 
 const initialValues = {
-  expenditure: ExpenditureTypes.Batch,
+  expenditure: ExpenditureTypes.Advanced,
   recipients: [newRecipient],
   filteredDomainId: String(ROOT_DOMAIN_ID),
   owner: undefined,
@@ -289,7 +288,6 @@ const ExpenditurePage = ({ match }: Props) => {
   const [isFormEditable, setFormEditable] = useState(true);
   const [formValues, setFormValues] = useState<ValuesType>();
   const [activeStateId, setActiveStateId] = useState<string>();
-  const [shouldValidate, setShouldValidate] = useState(false);
   const [status, setStatus] = useState<Status>();
   const [motion, setMotion] = useState<Motion>();
   const [inEditMode, setInEditMode] = useState(false);
@@ -342,7 +340,6 @@ const ExpenditurePage = ({ match }: Props) => {
 
   const handleSubmit = useCallback(
     (values) => {
-      setShouldValidate(true);
       if (!activeStateId) {
         setActiveStateId(Stage.Draft);
       }
@@ -556,12 +553,6 @@ const ExpenditurePage = ({ match }: Props) => {
     },
   ];
 
-  const handleValidate = useCallback(() => {
-    if (!shouldValidate) {
-      setShouldValidate(true);
-    }
-  }, [shouldValidate]);
-
   const handleCancelExpenditure = () =>
     colonyData &&
     openCancelExpenditureDialog({
@@ -653,9 +644,6 @@ const ExpenditurePage = ({ match }: Props) => {
       initialValues={initialValuesData}
       onSubmit={handleSubmit}
       validationSchema={validationSchema}
-      validateOnBlur={shouldValidate}
-      validateOnChange={shouldValidate}
-      validate={handleValidate}
       enableReinitialize
     >
       {({ values, validateForm }) => (

@@ -34,7 +34,7 @@ const LockedSidebar = ({
   activeState,
   handleReleaseMilestone,
 }: Props) => {
-  const { expenditure, recipients, filteredDomainId, staged } =
+  const { expenditure, recipients, filteredDomainId, staged, batch } =
     formValues || {};
 
   const secondFormSection = useMemo(() => {
@@ -74,6 +74,7 @@ const LockedSidebar = ({
     }
   }, [
     activeState,
+    batch,
     colony,
     editForm,
     expenditure,

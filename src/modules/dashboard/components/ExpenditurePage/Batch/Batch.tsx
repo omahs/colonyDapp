@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 import { useField } from 'formik';
 import classNames from 'classnames';
@@ -7,15 +7,14 @@ import { isEmpty, isNil } from 'lodash';
 import { FormSection } from '~core/Fields';
 import { Colony } from '~data/index';
 import TokenIcon from '~dashboard/HookedTokenIcon';
-import { SpinnerLoader } from '~core/Preloaders';
-import TokenIcon from '~dashboard/HookedTokenIcon';
 import Button from '~core/Button';
 import { useDialog } from '~core/Dialog';
 
 import CSVUploader from './CSVUploader';
-import PreviewDialog from './PreviewDialog';
 import { useCalculateBatchPayment } from './hooks';
 import DownloadTemplate from './DownloadTemplate';
+import PreviewDialog from './PreviewDialog';
+import { Batch as BatchType } from './types';
 import styles from './Batch.css';
 
 export const MSG = defineMessages({
@@ -74,11 +73,35 @@ interface Props {
 const Batch = ({ colony }: Props) => {
   const [processingCSVData, setProcessingCSVData] = useState<boolean>(false);
   const { formatMessage } = useIntl();
-  const [, { value: batch, error }] = useField<BatchType>('batch');
+  const [, { value: batch, error }, { setValue }] = useField<BatchType>(
+    'batch',
+  );
+
   const batchData = batch?.dataCSVUploader?.[0]?.parsedData;
 
   const data = useCalculateBatchPayment(colony, batchData);
   const { invalidRows, recipientsCount, tokens, validatedData } = data || {};
+
+  useEffect(() => {
+    setValue({
+      ...batch,
+      data: validatedData,
+      recipients: recipientsCount,
+      value: tokens,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validatedData]);
+
+  const errorMessage = useMemo(() => {
+    if (typeof error === 'string') {
+      return error;
+    }
+    if (error && 'dataCSVUploader' in error) {
+      const fileError = error?.['dataCSVUploader']?.[0]?.['parsedData'];
+      return fileError && 'id' in fileError && formatMessage(fileError);
+    }
+    return undefined;
+  }, [error, formatMessage]);
 
   const openPreviewDialog = useDialog(PreviewDialog);
 
@@ -110,6 +133,7 @@ const Batch = ({ colony }: Props) => {
           )}
         </div>
       </FormSection>
+      {error && <div className={styles.error}>{errorMessage}</div>}
       {data && (
         <>
           <FormSection appearance={{ border: 'bottom' }}>

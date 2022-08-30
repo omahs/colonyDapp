@@ -1,4 +1,4 @@
-import { ProcessedTokenBalances, ProcessedTokens } from '~data/generated';
+import { AnyToken } from '~data/index';
 
 export interface Batch {
   dataCSVUploader?: {
@@ -6,31 +6,25 @@ export interface Batch {
     file?: File;
     uploaded?: boolean;
   }[];
-  data?: BatchDataItem[];
+  data?: ValidatedBatchDataItem[];
   recipients?: number;
-  value?: {
-    token?: string;
-    value?: number;
-  };
-  tokens?: (
+  value?: Array<
     | {
-        amount: unknown;
-        token: Pick<
-          ProcessedTokens,
-          'symbol' | 'id' | 'address' | 'iconHash' | 'decimals' | 'name'
-        > & {
-          processedBalances: Pick<
-            ProcessedTokenBalances,
-            'domainId' | 'amount'
-          >[];
-        };
+        value?: number;
+        token?: AnyToken;
       }
     | undefined
-  )[];
+  >;
 }
 
 export interface BatchDataItem {
-  recipient: string;
-  token: string;
-  amount: string;
+  recipient?: string;
+  token?: string;
+  amount?: string;
+}
+
+export interface ValidatedBatchDataItem extends Omit<BatchDataItem, 'token'> {
+  error?: boolean;
+  token?: AnyToken;
+  id: string;
 }
