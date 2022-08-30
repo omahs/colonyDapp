@@ -172,19 +172,22 @@ const Batch = ({ colony }: Props) => {
                           })}
                           key={token.id}
                         >
-                          {formatMessage(MSG.valueWithToken, {
-                            token: token.symbol,
-                            amount: value,
-                            icon: (
-                              <span className={styles.icon}>
-                                <TokenIcon
-                                  className={styles.tokenIcon}
-                                  token={token}
-                                  name={token?.name || token?.address}
-                                />
-                              </span>
-                            ),
-                          })}
+                          <FormattedMessage
+                            {...MSG.valueWithToken}
+                            values={{
+                              token: token.symbol,
+                              amount: value,
+                              icon: (
+                                <span className={styles.icon}>
+                                  <TokenIcon
+                                    className={styles.tokenIcon}
+                                    token={token}
+                                    name={token?.name || token?.address}
+                                  />
+                                </span>
+                              ),
+                            }}
+                          />
                         </div>
                       )
                     );
