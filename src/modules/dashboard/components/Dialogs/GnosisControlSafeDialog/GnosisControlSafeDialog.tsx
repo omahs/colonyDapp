@@ -3,6 +3,9 @@ import { FormikProps } from 'formik';
 import * as yup from 'yup';
 import toFinite from 'lodash/toFinite';
 import { defineMessages } from 'react-intl';
+import Decimal from 'decimal.js';
+import { isHexString } from 'ethers/utils';
+import { MaxUint256 } from 'ethers/constants';
 
 import { AnyUser } from '~data/index';
 import Dialog, { DialogProps, ActionDialogProps } from '~core/Dialog';
@@ -25,17 +28,29 @@ const MSG = defineMessages({
     id: 'dashboard.GnosisControlSafeDialog.amountZero',
     defaultMessage: 'Amount must be greater than zero',
   },
-  notAddressArray: {
+  notAddressArrayError: {
     id: 'dashboard.GnosisControlSafeDialog.notAddressArray',
     defaultMessage: 'Addresses must be formatted correctly',
   },
-  notAddress: {
+  notAddressError: {
     id: 'dashboard.GnosisControlSafeDialog.notAddress',
     defaultMessage: 'Address must be formatted correctly',
   },
   notBooleanError: {
     id: 'dashboard.GnosisControlSafeDialog.notBooleanError',
-    defaultMessage: 'Value must be a boolean',
+    defaultMessage: 'Value must be a valid boolean',
+  },
+  notIntegerError: {
+    id: 'dashboard.GnosisControlSafeDialog.notIntegerError',
+    defaultMessage: 'Amount must be a valid integer',
+  },
+  notHexError: {
+    id: 'dashboard.GnosisControlSafeDialog.notHexError',
+    defaultMessage: 'Value must be a valid hex string',
+  },
+  notSafeIntegerError: {
+    id: 'dashboard.GnosisControlSafeDialog.notSafeIntegerError',
+    defaultMessage: 'Amount must be a safe integer',
   },
 });
 
@@ -109,13 +124,23 @@ const GnosisControlSafeDialog = ({
           otherwise: false,
         });
       }
-      if (inputType === 'uint256') {
+      if (inputType === 'uint256' || inputType === 'int256') {
         return yup.number().when('contractFunction', {
           is: (contractFunction) =>
             contractFunction === contractName || isArraySchema,
           then: yup
             .number()
-            .transform((value) => toFinite(value))
+            .test(
+              'is-integer',
+              () => MSG.notIntegerError,
+              (value) => new Decimal(value || 0).isInteger(),
+            )
+            .test(
+              'is-integer-safe',
+              () => MSG.notSafeIntegerError,
+              (value) =>
+                new Decimal(value || 0).lte(new Decimal(MaxUint256.toString())),
+            )
             .required(() => MSG.requiredFieldError),
           otherwise: false,
         });
@@ -128,9 +153,25 @@ const GnosisControlSafeDialog = ({
           then: yup
             .string()
             .address(() =>
-              isArraySchema ? MSG.notAddressArray : MSG.notAddress,
+              isArraySchema ? MSG.notAddressArrayError : MSG.notAddressError,
             )
             .required(() => MSG.requiredFieldError),
+          otherwise: false,
+        });
+      }
+      if (inputType === 'bytes') {
+        return yup.string().when('contractFunction', {
+          is: (contractFunction) => {
+            return contractFunction === contractName || isArraySchema;
+          },
+          then: yup
+            .string()
+            .required(() => MSG.requiredFieldError)
+            .test(
+              'is-hex',
+              () => MSG.notHexError,
+              (value) => isHexString(value),
+            ),
           otherwise: false,
         });
       }
