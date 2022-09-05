@@ -96,9 +96,9 @@ const Recipient = ({
   const newTokenData = useMemo(() => {
     return {
       ...newToken,
-      tokenAddress: colony.nativeTokenAddress,
+      tokenAddress: colony?.nativeTokenAddress,
     };
-  }, [colony.nativeTokenAddress]);
+  }, [colony]);
 
   return (
     <div className={styles.container}>
