@@ -161,6 +161,8 @@ const GnosisControlSafeForm = ({
   values,
   isVotingExtensionEnabled,
   setFieldValue,
+  setStatus,
+  status,
   showPreview,
   handleShowPreview,
   validateForm,
@@ -398,6 +400,8 @@ const GnosisControlSafeForm = ({
                           values={values}
                           safes={safes}
                           setFieldValue={setFieldValue}
+                          setStatus={setStatus}
+                          status={status}
                           selectedContractMethods={selectedContractMethods}
                           handleSelectedContractMethods={
                             handleSelectedContractMethods
